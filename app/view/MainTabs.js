@@ -1,28 +1,45 @@
 Ext.define('TouchChat.view.MainTabs',{   
-       extend: 'Ext.tab.Panel',   
-       xtype: 'mainTabs',   
+       extend: 'Ext.Container',   
+       alias: 'widget.mainTabsPanel',
+       xtype: 'mainTabsPanel',
        requires: [
         'Ext.TitleBar',
         'Ext.navigation.Bar',
-        'TouchChat.util.Config'
-    ],
-    config: {
-        tabBarPosition: 'bottom',
-        items: [
+        'Ext.tab.Panel'
+        ],
+        config: {          
+              layout: {
+               type: 'fit'
+              },
+              items: [
+               {
+                xtype: 'titlebar',
+                docked: 'top',
+                title: 'Touch Chat'
+               },
             {
-                title: 'Home',
-                iconCls: 'home',
-                itemId: 'homePanel',
-                xtype: 'panel',
-               styleHtmlContent: true,
-               html: [
-                   "Wlcome to QuickBlox Chat Sencha App"
-               ].join("")
+            xtype: 'tabpanel',
+            layout: {
+             animation: 'slide',
+             type: 'card'
             },
-            {
-                title: 'Users',
-                xtype: 'userPanel',
-                iconCls: 'user'
+            tabBarPosition: 'bottom',
+            items: [
+                {
+                    title: 'Home',
+                    iconCls: 'home',
+                    itemId: 'homePanel',
+                    xtype: 'panel',
+                    styleHtmlContent: true,
+                    html: [
+                       "Welcome to QuickBlox Chat Sencha App"
+                    ].join("")
+                },
+                {
+                    title: 'Users',
+                    xtype: 'userPanel',
+                    iconCls: 'user'
+                }]
             }]
     }
 }); 

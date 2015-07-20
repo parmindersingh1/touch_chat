@@ -10,7 +10,7 @@ Ext.define('TouchChat.controller.LoginController', {
     config: {
         refs: {
             mainView: 'mainView',
-            mainTabs: 'mainTabs',
+            mainTabs: 'mainTabsPanel',
             loginForm: 'loginForm',
             registerForm: 'registerForm',
             loginButton: 'loginForm #loginButton',
@@ -41,6 +41,7 @@ Ext.define('TouchChat.controller.LoginController', {
                     indicator: true,
                     message: 'Loading...'
                 });
+            
         QB.init(Config.config.qbApp.appID, Config.config.qbApp.authKey, Config.config.qbApp.authSecret, Config.config.qbApp.debug);
         QB.createSession(function(err, result) {
           if (err) { 
@@ -50,8 +51,7 @@ Ext.define('TouchChat.controller.LoginController', {
             console.log('Session created with id ' + result.id);
             me.session_id = result.id;
             me.populateUsers();
-            Ext.Viewport.unmask();   
-            me.showMainTabs();   
+            Ext.Viewport.unmask();  
           }
         });
        
@@ -239,9 +239,12 @@ Ext.define('TouchChat.controller.LoginController', {
 
     },
     showMainTabs: function(){
-        var mainTabs = Ext.ComponentQuery.query('mainTabs');
+        // var mainTabs = Ext.ComponentQuery.query('#mainTabsPanel');
+        var mainTabs = Ext.create('TouchChat.view.MainTabs',{
+            itemId: 'mainTabsPanel'
+        })
         console.log(mainTabs);
         Ext.Viewport.setActiveItem(mainTabs);
-        mainTabs.setActiveItem('homePanel');
+        mainTabs.setActiveItem('mainTabsPanel #homePanel');
     }
 });

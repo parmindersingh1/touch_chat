@@ -17,9 +17,9 @@ Ext.application({
         'Ext.MessageBox'
     ],
 
-    views: [
-        'MainTabs',
+    views: [        
         'Main',
+        'MainTabs',
         'LoginForm',
         'RegisterForm',
         'UserList'
