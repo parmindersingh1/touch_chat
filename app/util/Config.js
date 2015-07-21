@@ -9,7 +9,8 @@ Ext.define('TouchChat.util.Config', {
 			authSecret: 'vGJTQTEfaHnDSTW',
 			debug: true,
 			publicRoom: 'public'
-		}
+		},
+		presence: 60
 		// },
 		// users: {
 		// 	Quick: '999190', //password:- 123123123

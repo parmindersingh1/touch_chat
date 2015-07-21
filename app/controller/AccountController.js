@@ -5,7 +5,8 @@ Ext.define('TouchChat.controller.AccountController', {
         'Ext.Toast',
         'TouchChat.view.Main',       
         'TouchChat.util.Config',
-        'TouchChat.view.Main'
+        'TouchChat.view.MainTabs',
+        'TouchChat.util.LoginHelper'
     ],
 
     config: {
@@ -14,7 +15,8 @@ Ext.define('TouchChat.controller.AccountController', {
             loginForm: 'loginForm',
             registerForm: 'registerForm',         
             userPanel: 'userPanel',
-            showUsersButton: 'mainView #showUsers'
+            showUsersButton: 'mainView #showUsers',
+            logoutButton: 'mainTabsPanel #logoutButton'
         },
         control: {
             userPanel: {
@@ -23,6 +25,9 @@ Ext.define('TouchChat.controller.AccountController', {
                },
                showUsersButton: {
                 tap: 'showUsersList'
+               },
+               logoutButton: {
+                tap: 'onLogoutButtonTap'
                }
         }
     },
@@ -42,7 +47,7 @@ Ext.define('TouchChat.controller.AccountController', {
           Ext.Viewport.mask({
                     xtype: 'loadmask',
                     indicator: true,
-                    message: 'Signing up...'
+                    message: 'Deleting...'
                 });
          if(event.target.type == "button"){
             userId = event.target.name;
@@ -69,5 +74,41 @@ Ext.define('TouchChat.controller.AccountController', {
                             xtype: "userPanel",
                             title: "Users"
                         });
+        },
+        onLogoutButtonTap: function(button, e, eOpts){
+            var me = this;
+            var mainView = me.getMainView();
+             Ext.Viewport.mask({
+                    xtype: 'loadmask',
+                    indicator: true,
+                    message: 'Loging Out...'
+                });
+            QB.logout(function(err, result){
+              if (result) {
+                console.log(result);
+                LoginHelper.removeUser();
+                Ext.Viewport.setActiveItem(mainView);
+              } else  {
+                Ext.Msg.alert(err.message);
+              }    
+              Ext.Viewport.unmask();
+            });
+        },
+        connectChat: function() {
+           
+               
+       
+        },
+        onConnectFailed: function(){
+          console.log("onConnectFailed");
+        },
+        onConnectSuccess: function(){
+          console.log("onConnectSuccess");
+        },
+        onConnectClosed: function(){
+          console.log("onConnectClosed");
+        },
+        onChatMessage: function(){
+          console.log("onChatMessage");
         }
 });

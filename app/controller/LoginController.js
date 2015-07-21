@@ -4,7 +4,9 @@ Ext.define('TouchChat.controller.LoginController', {
     requires: [
         'Ext.Toast',
         'TouchChat.view.Main',       
-        'TouchChat.util.Config'
+        'TouchChat.util.Config',
+        'TouchChat.view.MainTabs',
+        'TouchChat.util.LoginHelper'
     ],
 
     config: {
@@ -45,12 +47,18 @@ Ext.define('TouchChat.controller.LoginController', {
         QB.init(Config.config.qbApp.appID, Config.config.qbApp.authKey, Config.config.qbApp.authSecret, Config.config.qbApp.debug);
         QB.createSession(function(err, result) {
           if (err) { 
-            Ext.Msg.alert('Something went wrong: ' + err);
+            Ext.Msg.alert('Something went wrong: ' + err.message);
              Ext.Viewport.unmask();
           } else {
             console.log('Session created with id ' + result.id);
             me.session_id = result.id;
             me.populateUsers();
+            var user = LoginHelper.getUser();
+            console.log("--------------------");
+            console.log(user);
+            if(user){
+                me.autoLogin(user);
+            }
             Ext.Viewport.unmask();  
           }
         });
@@ -99,11 +107,13 @@ Ext.define('TouchChat.controller.LoginController', {
             QB.login(params, function(err, user){
               if (user) {
                 console.log("User logged in Succesfully "+ user);
-                // TouchChat.app.getController('AccountController').showUsersList();
+                user.password = values.password;
+                LoginHelper.setUser(user);
+                TouchChat.app.getController('AccountController').connectChat();
                 me.showMainTabs();
               } else  {
-                console.log("log in Failure " + JSON.stringify(err));
-                Ext.Msg.alert(err);
+                console.log("log in Failure " + err.message);
+                Ext.Msg.alert(err.message);
               }
               
                Ext.Viewport.unmask();
@@ -112,6 +122,7 @@ Ext.define('TouchChat.controller.LoginController', {
     },
     onRegisterButtonTap: function(button, e, eOpts){
         var me = this;
+        var mainView = this.getMainView();        
         var userStore = Ext.getStore('UserStore');
         var register = Ext.create("TouchChat.model.Register", {});
         var registerForm = button.up('formpanel'); // Register form
@@ -139,9 +150,10 @@ Ext.define('TouchChat.controller.LoginController', {
                console.log("successfully Created User " + result);
                console.log("-----------------");
                console.log(result);
-               userStore.add(result);               
+               userStore.add(result);   
+               mainView.pop();
             }else  {
-                Ext.Msg.alert("Error Creating User " + JSON.stringify(err) );             
+                Ext.Msg.alert("Error Creating User " + err.messsage );             
             }
             Ext.Viewport.unmask();
         });
@@ -233,18 +245,34 @@ Ext.define('TouchChat.controller.LoginController', {
               }
               console.log('Number of Users after adding : ' + userStore.getCount());
             } else  {
-               Ext.Msg.alert("Error Loading Users " + err );             
+               Ext.Msg.alert("Error Loading Users " + err.message );             
             }
          });
 
     },
     showMainTabs: function(){
-        // var mainTabs = Ext.ComponentQuery.query('#mainTabsPanel');
+        // var mainTabs = Ext.ComponentQuery.query('#mainTabsPanel');       
         var mainTabs = Ext.create('TouchChat.view.MainTabs',{
             itemId: 'mainTabsPanel'
         })
         console.log(mainTabs);
         Ext.Viewport.setActiveItem(mainTabs);
-        mainTabs.setActiveItem('mainTabsPanel #homePanel');
+        // mainTabs.setActiveItem('mainTabsPanel #homePanel');
+    },
+    autoLogin: function(params){
+        console.log(params);
+         var me = this;
+        QB.login(params, function(err, user){
+              if (user) {
+                console.log("User logged in Succesfully "+ user);               
+                TouchChat.app.getController('AccountController').connectChat();
+                me.showMainTabs();
+              } else  {
+                console.log("log in Failure " + JSON.stringify(err));
+                Ext.Msg.alert(err.message);
+              }
+              
+               Ext.Viewport.unmask();
+            });
     }
 });

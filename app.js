@@ -22,18 +22,21 @@ Ext.application({
         'MainTabs',
         'LoginForm',
         'RegisterForm',
-        'UserList'
+        'UserList',
+        'MessageList'
     ],
     models: [
         'Login',
-        'User'
+        'User',
+        'Message'
     ],
     controllers: [
         'LoginController',
         'AccountController'
     ],
     stores: [
-        'Users'
+        'Users',
+        'Messages'
     ],
     icon: {
         '57': 'resources/icons/Icon.png',

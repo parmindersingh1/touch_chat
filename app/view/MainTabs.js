@@ -5,7 +5,8 @@ Ext.define('TouchChat.view.MainTabs',{
        requires: [
         'Ext.TitleBar',
         'Ext.navigation.Bar',
-        'Ext.tab.Panel'
+        'Ext.tab.Panel',
+        'TouchChat.view.MessageList'
         ],
         config: {          
               layout: {
@@ -15,7 +16,13 @@ Ext.define('TouchChat.view.MainTabs',{
                {
                 xtype: 'titlebar',
                 docked: 'top',
-                title: 'Touch Chat'
+                title: 'Touch Chat',
+                items:[{
+                  xtype: 'button',
+                  text:  'logout',
+                  align: 'right',
+                  itemId: 'logoutButton'
+                }]
                },
             {
             xtype: 'tabpanel',
@@ -39,6 +46,11 @@ Ext.define('TouchChat.view.MainTabs',{
                     title: 'Users',
                     xtype: 'userPanel',
                     iconCls: 'user'
+                },
+                {
+                    title: 'Chats',
+                    xtype: 'messagelist',
+                    iconCls: 'compose'
                 }]
             }]
     }
