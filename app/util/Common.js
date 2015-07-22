@@ -21,6 +21,9 @@ Ext.define('TouchChat.util.Common', {
                 return false;
             }
         },
+        numberWithCommas: function(x) {
+            return x.toString().replace(/\B(?=(?:\d{3})+(?!\d))/g, ",");
+        }
     },
     constructor: function() {
         return this.config;

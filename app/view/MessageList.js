@@ -30,10 +30,11 @@ Ext.define('TouchChat.view.MessageList', {
 					xtype: 'textareafield',
 					height: 60,
 					flex: 5,
-					name: 'message'
+					name: 'message',
+					itemId: 'messageBody'
 				}, {
 					xtype: 'button',
-					itemId: 'send',
+					itemId: 'sendMessage',
 					ui: 'action',
 					flex: 1,
 					text: 'Send'
