@@ -25,7 +25,7 @@ Ext.define('TouchChat.controller.AccountController', {
         control: {
             userPanel: {
                 activate: 'onActivate',
-                itemtap: 'onItemTap',
+                itemtap: 'deleteUser'
                },
                showUsersButton: {
                 tap: 'showUsersList'
@@ -38,7 +38,25 @@ Ext.define('TouchChat.controller.AccountController', {
               },
               sendMessage: {
                 tap: 'sendMessage'
+              },
+              messageList: {
+                itemtap: 'deleteMessage'
               }
+              // ,
+              // messageList: {
+              //   initialize: function (list) {
+              //     var me = this,
+              //     //   scroller = list.getScrollable().getScroller();
+
+              //     // scroller.on('maxpositionchange', function (scroller, maxPos, opts) {
+              //     //   me.setMaxPosition(maxPos.y);
+              //     // });
+
+              //     // me.setScroller(scroller);
+
+              //     // me.getMessage().setValue(Ext.create('Chat.ux.LoremIpsum').getSentence());
+              //   }
+              // }
         }
     },
     launch: function() {
@@ -48,10 +66,10 @@ Ext.define('TouchChat.controller.AccountController', {
       console.log('User container is active');
      },
      
-     onItemTap: function(view, index, target, record, event) {
+     deleteUser: function(view, index, target, record, event) {
          console.log('Item was tapped on the Data View');
          // console.log(view, index, target, record, event);
-          var me = this;
+        var me = this;
         var userStore = Ext.getStore('UserStore');
          var userId;
           Ext.Viewport.mask({
@@ -109,10 +127,14 @@ Ext.define('TouchChat.controller.AccountController', {
         var user = LoginHelper.getUser();
           if(button.getTitle() === 'Chats' ) {
             me.connectChat(user);
+           } else {
+            me.chatRoom = null;
+            QB.chat.disconnect();
            }
         },
         connectChat: function(chatUser){
             var me = this;
+            var currentUser = LoginHelper.getUser();
             console.log("Inside connectChat");
             Ext.Viewport.mask({
                     xtype: 'loadmask',
@@ -132,8 +154,7 @@ Ext.define('TouchChat.controller.AccountController', {
                 console.log("chat connected");
                 Ext.Viewport.unmask();
                 me.createRoom();
-                QB.chat.onMessageListener = function(senderId, message) {
-  
+                QB.chat.onMessageListener = function(senderId, message) {                 
                   // check if this message is a notification about new room
                   if (message.extension && message.extension.notification_type === '1') {
 
@@ -141,7 +162,18 @@ Ext.define('TouchChat.controller.AccountController', {
                     QB.chat.muc.join(message.extension.room_jid, function() {
                       // some actions
                     });
-                  }             
+                  } else {
+                       message.local = false;
+                        // regex = new RegExp('^' + String(currentUser.id) + '$', 'i');  
+                      // if(regex.test(String(senderId))) {
+                      if(currentUser.id == senderId) {
+                        // Ext.apply({local: true}, message);
+                        message.local= true;
+                      } 
+                      me.addMessage(message, senderId);
+                      console.log(message);
+                   }
+                  
               }
             }
               
@@ -156,7 +188,7 @@ Ext.define('TouchChat.controller.AccountController', {
                     indicator: true,
                     message: 'Please Wait...'
                 });
-
+          Ext.getStore('Messages').removeAll();
           var userStore = Ext.getStore('UserStore'),
               appId = Config.config.qbApp.appID,
               me = this,
@@ -170,8 +202,9 @@ Ext.define('TouchChat.controller.AccountController', {
              // dialog was created
               if (dialog) {
                 var jid = dialog.xmpp_room_jid;
-                console.log("************************" + dialog.xmpp_room_jid);
-
+                me.chatRoom = dialog.xmpp_room_jid;
+                me.getRoomHistory();
+               
                 // join to created room
                 QB.chat.muc.join(dialog.xmpp_room_jid, function() {
 
@@ -206,21 +239,77 @@ Ext.define('TouchChat.controller.AccountController', {
         sendMessage: function(button, e, eOpts ) {
           console.log("sendMessage");
           var messageBody = Ext.ComponentQuery.query('messagelist #messageBody')[0];
-          console.log(Ext.ComponentQuery.query('messagelist #messageBody')[0]);
-          console.log(messageBody.getValue());
-          // var me = this;
-          // var message = {
-          //         body: $('#textMessage').val(),
-          //         type: 'groupchat',
-          //         extension: {
-          //     save_to_history: 1,
-          //     date_sent: Math.floor(Date.now() / 1000)
-          //   }
-          // };
-          // $('#textMessage').val('');
-          // QB.chat.send(current_room, message);
-          // console.log("Message sent");
+           var currentUser = LoginHelper.getUser();
+          console.log(messageBody);
+          var me = this;
+          var message = {
+                  body: messageBody.getValue(),
+                  type: 'groupchat',
+                  extension: {
+              save_to_history: 1,
+              date_sent: Math.floor(Date.now() / 1000)              
+            }
+          };
+          messageBody.setValue('');
+          QB.chat.send(me.chatRoom, message);
+          console.log("Message sent");
+        },
+        addMessage: function(message,userId) {
+          var user = Ext.getStore('UserStore').getById(userId);
+           console.log( message);
+          var storeMessage = {
+            id: message.id,
+            login: user.get('login'),
+            message: message.body,
+            local: message.local 
+          }
+          Ext.getStore('Messages').add(storeMessage);
 
-        }
+          // if (this.getMaxPosition()) {
+          //   this.getScroller().scrollToEnd(true);
+          // }
+        },
+        getRoomHistory: function() {
+          var me = this;
+          QB.chat.message.list({chat_dialog_id: QB.chat.helpers.getDialogIdFromNode(me.chatRoom)}, function(err, message) {
+            if (err) {
+              console.log(err);
+            } else {
+                console.log(message.items.length);
+              // for (var i = 0; i < message.items.length; i++) {
+              //   $('.messages p').append(message.items[i].sender_id + ': ' + message.items[i].message + '<br />');
+              // };
+             // console.log('*************History ends***************');
+            }
+          });
+        },
+         deleteMesage: function(view, index, target, record, event) {
+           console.log('Item was tapped on the Data Message View');
+           // console.log(view, index, target, record, event);
+          var me = this;
+          var messageStore = Ext.getStore('Messages');
+           var msgId;
+            Ext.Viewport.mask({
+                      xtype: 'loadmask',
+                      indicator: true,
+                      message: 'Deleting...'
+                  });
+           if(event.target.type == "button"){
+              msgrId = event.target.name;
+           }
+           else {
+              msgId =record.get('id');
+           }
+           var currentMessage = messageStore.getById(msgId);
+           QB.chat.message.delete(message_id, function(err, message) {
+                if (message) {
+                  console.log("Deleted message is " + JSON.stringify(message));                
+                  messageStore.remove(currentMessage);
+                } else  {
+                  console.log("Error Deleting User  " + JSON.stringify(err));
+                }
+                 Ext.Viewport.unmask();
+              });
+        },
 
 });

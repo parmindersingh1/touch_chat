@@ -1,5 +1,5 @@
 Ext.define('TouchChat.view.MessageList', {
-	extend: 'Ext.List',
+	extend: 'Ext.dataview.List',
 
 	xtype: 'messagelist',
 	
@@ -10,12 +10,14 @@ Ext.define('TouchChat.view.MessageList', {
 
 		itemTpl : new Ext.XTemplate(
 			'<tpl if="local">',
-			'	<div class="nick local">{nickname}</div>',
+			'	<div class="nick local">{login}</div>',
+			'   <input type="button" name="{id}" value="Delete" ', 
+            '   style="padding:3px;">',
 			'	<div class="x-button x-button-confirm local"">',
 			'		<p class="x-button-label message">{message}</p>',
 			'	</div>',
 			'<tpl else>',
-			'	<div class="nick remote">{nickname}</div>',
+			'	<div class="nick remote">{login}</div>',
 			'	<div class="x-button remote"">',
 			'		<p class="x-button-label message">{message}</p>',
 			'	</div>',

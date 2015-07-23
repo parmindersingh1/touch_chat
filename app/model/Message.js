@@ -2,12 +2,17 @@ Ext.define('TouchChat.model.Message', {
 	extend: 'Ext.data.Model',
 
 	config: {
+		idProperty: 'id',
 		fields: [
+			{
+				name: 'id',
+				type: 'integer'
+			},
 			{
 				name: 'local',
 				type: 'boolean'
 			}, {
-				name: 'nickname',
+				name: 'login',
 				type: 'string'
 			}, {
 				name: 'message',

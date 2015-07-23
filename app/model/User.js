@@ -1,10 +1,11 @@
 Ext.define('TouchChat.model.User', {
     extend: 'Ext.data.Model',
     config: {
+     idProperty: 'id',
      fields: [              
               {
               	name: 'id',
-	            type: 'string'
+	            type: 'integer'
 	       	  },
 	       	  {
               	name: 'owner_id',
