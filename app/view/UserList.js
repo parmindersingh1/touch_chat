@@ -2,7 +2,6 @@ Ext.define('TouchChat.view.UserList', {
     extend: 'Ext.dataview.List',
     xtype : 'userPanel',
      requires: [
-        'Ext.Toast',
         'TouchChat.view.Main',       
         'TouchChat.util.Config',
         'TouchChat.util.LoginHelper'

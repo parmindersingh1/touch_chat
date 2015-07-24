@@ -18,9 +18,9 @@ Ext.define('TouchChat.controller.AccountController', {
             userPanel: 'userPanel',
             showUsersButton: 'mainView #showUsers',
             logoutButton: 'mainTabsPanel #logoutButton',
-             tabs: 'mainTabsPanel > tabpanel > tabbar > tab',
-             messageList: 'messagelist',
-             sendMessage: 'messagelist #sendMessage'
+            tabs: 'mainTabsPanel > tabpanel > tabbar > tab',
+            messageList: 'messagelist',
+            sendMessage: 'messagelist #sendMessage'
         },
         control: {
             userPanel: {
@@ -40,6 +40,7 @@ Ext.define('TouchChat.controller.AccountController', {
                 tap: 'sendMessage'
               },
               messageList: {
+                activate: 'onActivateChat',
                 itemtap: 'deleteMessage'
               }
               // ,
@@ -65,34 +66,45 @@ Ext.define('TouchChat.controller.AccountController', {
     onActivate: function() {
       console.log('User container is active');
      },
-     
+     onActivateChat: function() {
+      console.log('Chat container is active');
+     },
      deleteUser: function(view, index, target, record, event) {
          console.log('Item was tapped on the Data View');
-         // console.log(view, index, target, record, event);
-        var me = this;
-        var userStore = Ext.getStore('UserStore');
-         var userId;
-          Ext.Viewport.mask({
-                    xtype: 'loadmask',
-                    indicator: true,
-                    message: 'Deleting...'
-                });
-         if(event.target.type == "button"){
-            userId = event.target.name;
-         }
-         else {
-            userId =record.get('id');
-         }
-         var currentUser = userStore.getById(userId);
-          QB.users.delete(parseInt(userId), function(err, user){
-              if (user) {
-                console.log("Deleted User is " + JSON.stringify(user));                
-                userStore.remove(currentUser);
-              } else  {
-                console.log("Error Deleting User  " + JSON.stringify(err));
-              }
-               Ext.Viewport.unmask();
-            });
+         Ext.Msg.confirm('Warning', 'Do you want Delete User?', 
+        function(btn) {
+           if (btn === 'yes') {
+               // console.log(view, index, target, record, event);
+              var me = this;
+              var userStore = Ext.getStore('UserStore');
+               var userId;
+                Ext.Viewport.mask({
+                          xtype: 'loadmask',
+                          indicator: true,
+                          message: 'Deleting...'
+                      });
+               if(event.target.type == "button"){
+                  userId = event.target.name;
+               }
+               else {
+                  userId =record.get('id');
+               }
+               var currentUser = userStore.getById(userId);
+                QB.users.delete(parseInt(userId), function(err, user){
+                    if (user) {
+                      console.log("Deleted User is " + JSON.stringify(user));                
+                      userStore.remove(currentUser);
+                    } else  {
+                      console.log("Error Deleting User  " + JSON.stringify(err));
+                    }
+                     Ext.Viewport.unmask();
+                  });
+
+           } else {
+              return false;
+           }
+        });
+        
         },
         showUsersList: function(button, e, eOpts) {
             console.log("tap");
@@ -283,9 +295,12 @@ Ext.define('TouchChat.controller.AccountController', {
             }
           });
         },
-         deleteMesage: function(view, index, target, record, event) {
+         deleteMessage: function(view, index, target, record, event) {
            console.log('Item was tapped on the Data Message View');
            // console.log(view, index, target, record, event);
+             Ext.Msg.confirm('Warning', 'Do you want Delete Message?', 
+        function(btn) {
+           if (btn === 'yes') {
           var me = this;
           var messageStore = Ext.getStore('Messages');
            var msgId;
@@ -300,8 +315,9 @@ Ext.define('TouchChat.controller.AccountController', {
            else {
               msgId =record.get('id');
            }
+           console.log(msgId);
            var currentMessage = messageStore.getById(msgId);
-           QB.chat.message.delete(message_id, function(err, message) {
+           QB.chat.message.delete(msgId, function(err, message) {
                 if (message) {
                   console.log("Deleted message is " + JSON.stringify(message));                
                   messageStore.remove(currentMessage);
@@ -310,6 +326,10 @@ Ext.define('TouchChat.controller.AccountController', {
                 }
                  Ext.Viewport.unmask();
               });
+             } else {
+              return false;
+           }
+        });
         },
 
 });

@@ -5,7 +5,6 @@ Ext.define('TouchChat.view.MessageList', {
 	
 	config: {
 		disableSelection: true,
-		title: 'Sencha Touch Chat',
 		store: 'Messages',
 
 		itemTpl : new Ext.XTemplate(
