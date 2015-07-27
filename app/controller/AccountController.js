@@ -71,8 +71,7 @@ Ext.define('TouchChat.controller.AccountController', {
      },
      deleteUser: function(view, index, target, record, event) {
          console.log('Item was tapped on the Data View');
-         Ext.Msg.confirm('Warning', 'Do you want Delete User?', 
-        function(btn) {
+         Ext.Msg.confirm('Warning', 'Do you want Delete User?', function(btn) {
            if (btn === 'yes') {
                // console.log(view, index, target, record, event);
               var me = this;
@@ -237,8 +236,9 @@ Ext.define('TouchChat.controller.AccountController', {
                     }});
                   }
                   Ext.Viewport.unmask();
-
+                 
                 });
+                 me.occupants_ids = dialog.occupants_ids;
               }
             });
 
@@ -264,10 +264,19 @@ Ext.define('TouchChat.controller.AccountController', {
           };
           messageBody.setValue('');
           QB.chat.send(me.chatRoom, message);
+          var ids = [];
+          console.log(Ext.isArray(me.occupants_ids));
+          Ext.Array.each(me.occupants_ids,function(id){
+          // me.occupants_ids.each(function(id){
+            if(currentUser.id !== id) ids.push(id);
+          });
+          me.sendPushNotification(ids.join(","), message.body);
           console.log("Message sent");
         },
         addMessage: function(message,userId) {
+          var currentUser = LoginHelper.getUser();
           var user = Ext.getStore('UserStore').getById(userId);
+          var me = this;
            console.log( message);
           var storeMessage = {
             id: message.id,
@@ -275,7 +284,11 @@ Ext.define('TouchChat.controller.AccountController', {
             message: message.body,
             local: message.local 
           }
-          Ext.getStore('Messages').add(storeMessage);
+          Ext.getStore('Messages').add(storeMessage);      
+          
+          // me.sendPushNotification(me.occupants_ids,message.body);
+         
+         
 
           // if (this.getMaxPosition()) {
           //   this.getScroller().scrollToEnd(true);
@@ -331,5 +344,25 @@ Ext.define('TouchChat.controller.AccountController', {
            }
         });
         },
+        sendPushNotification: function(userIds,message) {
+          console.log(userIds);
+          var params = {
+            notification_type: "push", 
+            environment: "production", 
+            user: {
+              ids: userIds
+            }, 
+            message: "payload="+btoa(message), 
+            push_type: "apns"
+          };
+
+          QB.messages.events.create(params, function(err, response){
+            if (err) {
+              console.log(err);
+            } else {
+              console.log(response);
+            }
+          });
+        }
 
 });

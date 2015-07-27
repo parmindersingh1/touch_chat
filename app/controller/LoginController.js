@@ -6,7 +6,8 @@ Ext.define('TouchChat.controller.LoginController', {
         'TouchChat.view.Main',       
         'TouchChat.util.Config',
         'TouchChat.view.MainTabs',
-        'TouchChat.util.LoginHelper'
+        'TouchChat.util.LoginHelper',
+        'Ext.device.Device'
     ],
 
     config: {
@@ -61,7 +62,40 @@ Ext.define('TouchChat.controller.LoginController', {
             Ext.Viewport.unmask();  
           }
         });
-       
+        Ext.toast([
+            'Device name: ' + Ext.device.Device.name,
+            'Device platform: ' + Ext.device.Device.platform,
+            'Device UUID: ' + Ext.device.Device.uuid
+        ].join('\n'), 5000);
+
+        // Push Notifications 
+
+        var params = {
+          environment: "development",
+          client_identification_sequence: "144",
+          platform: Ext.device.Device.platform.toLowerCase(),
+          udid: Ext.device.Device.uuid
+        };
+
+        QB.messages.tokens.create(params, function(err, response){
+          if (err) {
+            console.log(err);
+          } else {
+            console.log(response);
+          }
+        });
+
+        // Create Subscriptions
+        var subsciption = { notification_channels: "apns" };
+
+        QB.messages.subscriptions.create(subsciption, function(err, response){
+          if (err) {
+            console.log(err);
+          } else {
+            console.log(response);
+          }
+        });
+               
     },  
     showLoginForm: function(button, e, eOpts){      
        var mainView = this.getMainView();
