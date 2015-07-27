@@ -265,9 +265,7 @@ Ext.define('TouchChat.controller.AccountController', {
           messageBody.setValue('');
           QB.chat.send(me.chatRoom, message);
           var ids = [];
-          console.log(Ext.isArray(me.occupants_ids));
           Ext.Array.each(me.occupants_ids,function(id){
-          // me.occupants_ids.each(function(id){
             if(currentUser.id !== id) ids.push(id);
           });
           me.sendPushNotification(ids.join(","), message.body);
